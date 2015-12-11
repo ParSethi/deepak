@@ -254,7 +254,7 @@ public class DownloadFormsTask extends
                     throw new TaskCancelledException(formFile, "Form " + formFile.getName() + " was cancelled while it was being parsed.");
                 }
 
-                v.put(FormsColumns.DISPLAY_NAME, formInfo.get(FileUtils.TITLE));
+                v.put(FormsColumns.DISPLAY_NAME,formInfo.get(FileUtils.TITLE) );
                 v.put(FormsColumns.JR_VERSION, formInfo.get(FileUtils.VERSION));
                 v.put(FormsColumns.JR_FORM_ID, formInfo.get(FileUtils.FORMID));
                 v.put(FormsColumns.SUBMISSION_URI, formInfo.get(FileUtils.SUBMISSIONURI));
@@ -297,6 +297,7 @@ public class DownloadFormsTask extends
         rootName = rootName.trim();
 
         // proposed name of xml file...
+
         String path = Collect.FORMS_PATH + File.separator + rootName + ".xml";
         int i = 2;
         File f = new File(path);

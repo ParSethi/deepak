@@ -16,13 +16,13 @@ apply plugin: 'com.android.application'
 
 android {
     // The following are set in the common.gradle file
-    compileSdkVersion("Google Inc.:Google APIs:19")
+    compileSdkVersion("Google Inc.:Google APIs:22")
     buildToolsVersion("22.0.1")
 
     defaultConfig {
         applicationId("org.odk.collect.android")
         minSdkVersion(8)
-        targetSdkVersion(8)
+        targetSdkVersion(22)
         versionCode(1057)
         versionName("1.4.8")
     }

@@ -109,6 +109,38 @@
                 android:layout_height="wrap_content"
                 android:padding="20dp"
                 android:textSize="21sp" />
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:id="@+id/get_forms_spac" />
+           <!-- <Button
+                android:id="@+id/sycButt"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="pull"
+                android:padding="20dp"
+                android:textSize="21sp" />
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:id="@+id/get_forms_spac1" />
+            <Button
+                android:id="@+id/img"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="img"
+                android:padding="20dp"
+                android:textSize="21sp" />
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:id="@+id/get_forms_spac2" />
+            <ImageView
+                android:id="@+id/imageview"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:scaleType="center"/>-->
+
         </LinearLayout>
     </ScrollView>
 

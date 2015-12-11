@@ -53,6 +53,7 @@ public class SaveToDiskTask extends AsyncTask<Void, String, SaveResult> {
     private Boolean mSave;
     private Boolean mMarkCompleted;
     private Uri mUri;
+
     private String mInstanceName;
 
     public static final int SAVED = 500;

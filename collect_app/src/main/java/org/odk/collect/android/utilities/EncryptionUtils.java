@@ -352,7 +352,7 @@ public class EncryptionUtils {
 			formVersion = formCursor.isNull(idxVersion) ? null : formCursor.getString(idxVersion);
 			String base64RsaPublicKey = formCursor.isNull(idxBase64RsaPublicKey)
 					? null : formCursor.getString(idxBase64RsaPublicKey);
-
+System.out.println(base64RsaPublicKey+"  form statp");
 			if (base64RsaPublicKey == null || base64RsaPublicKey.length() == 0) {
 				return null; // this is legitimately not an encrypted form
 			}

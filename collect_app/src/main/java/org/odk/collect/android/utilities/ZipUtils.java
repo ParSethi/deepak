@@ -45,6 +45,7 @@ public final class ZipUtils {
                 ZipEntry zipEntry;
                 while ((zipEntry = zipInputStream.getNextEntry()) != null) {
                     doExtractInTheSameFolder(zipFile, zipInputStream, zipEntry);
+
                 }
             } catch (Exception e) {
                 Log.e(t, e.getMessage(), e);

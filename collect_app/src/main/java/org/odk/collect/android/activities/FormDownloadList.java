@@ -504,7 +504,7 @@ public class FormDownloadList extends ListActivity implements FormListDownloader
         totalCount = filesToDownload.size();
 
         Collect.getInstance().getActivityLogger().logAction(this, "downloadSelectedFiles", Integer.toString(totalCount));
-
+System.out.println("dooo");
         if (totalCount > 0) {
             // show dialog box
             showDialog(PROGRESS_DIALOG);

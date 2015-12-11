@@ -65,7 +65,7 @@ public class InstanceChooserList extends ListActivity {
         String[] selectionArgs = {InstanceProviderAPI.STATUS_SUBMITTED};
         String sortOrder = InstanceColumns.STATUS + " DESC, " + InstanceColumns.DISPLAY_NAME + " ASC";
         Cursor c = managedQuery(InstanceColumns.CONTENT_URI, null, selection, selectionArgs, sortOrder);
-
+System.out.println("instanceChooser");
         String[] data = new String[] {
                 InstanceColumns.DISPLAY_NAME, InstanceColumns.DISPLAY_SUBTEXT
         };
@@ -102,6 +102,7 @@ public class InstanceChooserList extends ListActivity {
         String action = getIntent().getAction();
         if (Intent.ACTION_PICK.equals(action)) {
             // caller is waiting on a picked form
+            System.out.println("action");
             setResult(RESULT_OK, new Intent().setData(instanceUri));
         } else {
             // the form can be edited if it is incomplete or if, when it was
@@ -118,6 +119,7 @@ public class InstanceChooserList extends ListActivity {
                     	          DO_NOT_EXIT);
             	return;
             }
+            System.out.println("activitypppp");
             // caller wants to view/edit a form, so launch formentryactivity
             startActivity(new Intent(Intent.ACTION_EDIT, instanceUri));
         }

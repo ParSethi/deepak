@@ -55,6 +55,7 @@ public class Base64Wrapper {
 			e.printStackTrace();
 			throw new IllegalArgumentException(e.toString());
 		} catch (InvocationTargetException e) {
+
 			e.printStackTrace();
 			throw new IllegalArgumentException(e.toString());
 		} catch (UnsupportedEncodingException e) {

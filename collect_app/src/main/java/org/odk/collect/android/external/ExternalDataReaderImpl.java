@@ -47,6 +47,7 @@ public class ExternalDataReaderImpl implements ExternalDataReader {
             File dataSetFile = stringFileEntry.getValue();
             if (dataSetFile.exists()) {
                 File dbFile = new File(dataSetFile.getParentFile().getAbsolutePath(), dataSetName + ".db");
+                System.out.println(dataSetFile.getParentFile().getAbsolutePath()+dataSetName +"  ExternalDataReaderImpl  ");
                 if (dbFile.exists()) {
                     // this means the someone updated the csv file, so we need to reload it
                     boolean deleted = dbFile.delete();

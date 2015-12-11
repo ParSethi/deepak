@@ -170,7 +170,9 @@ public class DiskSyncTask extends AsyncTask<Void, String, String> {
 		        Collections.shuffle(xFormsToAdd); // Big win if multiple DiskSyncTasks running
 		        while ( !xFormsToAdd.isEmpty() ) {
 		        	File formDefFile = xFormsToAdd.remove(0);
-		        	
+
+
+
 		        	// Since parsing is so slow, if there are multiple tasks, 
 		        	// they may have already updated the database.  
 		        	// Skip this file if that is the case.
@@ -201,6 +203,7 @@ public class DiskSyncTask extends AsyncTask<Void, String, String> {
 		        	} catch ( SQLException e ) {
 		        		Log.i(t, "["+instance+"] " + e.toString());
 		        	}
+					System.out.println("popo");
 	            }
 	        }
 	        if ( errors.length() != 0 ) {
@@ -303,6 +306,7 @@ public class DiskSyncTask extends AsyncTask<Void, String, String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
+		System.out.println("posttttt");
         if (mListener != null) {
             mListener.SyncComplete(result);
         }

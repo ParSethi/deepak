@@ -117,6 +117,8 @@ public class FormLoaderTask extends AsyncTask<String, String, FormLoaderTask.FEC
     mInstancePath = instancePath;
     mXPath = XPath;
     mWaitingXPath = waitingXPath;
+
+
   }
 
   /**
@@ -126,6 +128,7 @@ public class FormLoaderTask extends AsyncTask<String, String, FormLoaderTask.FEC
    */
   @Override
   protected FECWrapper doInBackground(String... path) {
+    System.out.println("in filellodertask");
     FormEntryController fec = null;
     FormDef fd = null;
     FileInputStream fis = null;
@@ -135,6 +138,7 @@ public class FormLoaderTask extends AsyncTask<String, String, FormLoaderTask.FEC
 
     File formXml = new File(formPath);
     String formHash = FileUtils.getMd5Hash(formXml);
+    System.out.println(formHash+"  md5lp");
     File formBin = new File(Collect.CACHE_PATH + File.separator + formHash + ".formdef");
 
     publishProgress(Collect.getInstance().getString(R.string.survey_loading_reading_form_message));
@@ -165,10 +169,12 @@ public class FormLoaderTask extends AsyncTask<String, String, FormLoaderTask.FEC
         formBin.delete();
       }
     }
+    else
+    System.out.println("formdef not present");
     if (fd == null) {
       // no binary, read from xml
       try {
-        Log.i(t, "Attempting to load from: " + formXml.getAbsolutePath());
+        Log.i(t, "Attempting to load from par: " + formXml.getAbsolutePath());
         fis = new FileInputStream(formXml);
         fd = XFormUtils.getFormFromInputStream(fis);
         if (fd == null) {
@@ -206,6 +212,7 @@ public class FormLoaderTask extends AsyncTask<String, String, FormLoaderTask.FEC
 
     try {
       loadExternalData(formMediaDir);
+      System.out.println("loadext....");
     } catch (Exception e) {
       mErrorMsg = e.getMessage();
       e.printStackTrace();
@@ -224,22 +231,36 @@ public class FormLoaderTask extends AsyncTask<String, String, FormLoaderTask.FEC
     boolean usedSavepoint = false;
 
     try {
+      System.out.println(mInstancePath+"  minstance");
       // import existing data into formdef
       if (mInstancePath != null) {
         File instance = new File(mInstancePath);
+        System.out.println(instance.getPath()+" nany inside");
         File shadowInstance = SaveToDiskTask.savepointFile(instance);
-        if (shadowInstance.exists() && (shadowInstance.lastModified() > instance.lastModified())) {
+        System.out.println("savid  "+shadowInstance.getPath());
+        System.out.println(shadowInstance.exists());
+                System.out.println(shadowInstance.lastModified()>instance.lastModified());
+        //&& shadowInstance.lastModified()>instance.lastModified()
+
+       if (shadowInstance.exists() ) {
           // the savepoint is newer than the saved value of the instance.
           // use it.
+
           usedSavepoint = true;
           instance = shadowInstance;
           Log.w(t, "Loading instance from shadow file: " + shadowInstance.getAbsolutePath());
         }
+
         if (instance.exists()) {
+          System.out.println(instance.getName() + " koko");
           // This order is important. Import data, then initialize.
           try {
+           // usedSavepoint = true;
+            //instance = shadowInstance;
             importData(instance, fec);
             fd.initialize(false, new InstanceInitializationFactory());
+
+            System.out.println("instance ex nany");
           } catch (RuntimeException e) {
             Log.e(t, e.getMessage(), e);
 
@@ -247,6 +268,7 @@ public class FormLoaderTask extends AsyncTask<String, String, FormLoaderTask.FEC
             if (usedSavepoint && !(e.getCause() instanceof XPathTypeMismatchException)) {
               // this means that the .save file is corrupted or 0-sized, so
               // don't use it.
+              System.out.println("corrutedd");
               usedSavepoint = false;
               mInstancePath = null;
               fd.initialize(true, new InstanceInitializationFactory());

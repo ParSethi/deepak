@@ -100,8 +100,10 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
         File instanceFile = new File(instanceFilePath);
         ContentValues cv = new ContentValues();
         Uri u = Uri.parse(urlString);
+        System.out.println(u.toString()+" vovo");
         HttpClient httpclient = WebUtils.createHttpClient(CONNECTION_TIMEOUT);
 
+System.out.println( urlString+"hello");
         boolean openRosaServer = false;
         if (uriRemap.containsKey(u)) {
             // we already issued a head request and got a response,
@@ -542,7 +544,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
 
 	                // add the deviceID to the request...
 	                try {
-						urlString += "?deviceID=" + URLEncoder.encode(deviceId, "UTF-8");
+						urlString += "?deviceID=" + URLEncoder.encode(deviceId, "UTF-8")+"instanceId="+selectionArgs[0];
 					} catch (UnsupportedEncodingException e) {
 						// unreachable...
 					}

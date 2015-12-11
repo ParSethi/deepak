@@ -175,10 +175,10 @@ public class FileUtils {
 
         } catch (FileNotFoundException e) {
             Log.e("No Cache File", e.getMessage());
-            return null;
+            return  null+"cachh";
         } catch (IOException e) {
             Log.e("Problem reading from file", e.getMessage());
-            return null;
+            return null+"prblm";
         }
 
     }
@@ -311,9 +311,11 @@ public class FileUtils {
             int idx = cur.getChildCount();
             int i;
             for (i = 0; i < idx; ++i) {
-                if (cur.isText(i))
-                    continue;
+                if (cur.isText(i)){
+                    System.out.println(" par");
+                    continue;}
                 if (cur.getType(i) == Node.ELEMENT) {
+                    System.out.println("jogiya");
                     break;
                 }
             }

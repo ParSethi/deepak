@@ -13,34 +13,70 @@
  */
 
 package org.odk.collect.android.activities;
-
+import org.javarosa.core.io.BufferedInputStream;
+import org.odk.collect.android.utilities.WebUtils;
+import org.odk.collect.android.utilities.ZipUtils;
+import android.content.DialogInterface;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.net.URI;
+import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.preferences.AdminPreferencesActivity;
 import org.odk.collect.android.preferences.PreferencesActivity;
+import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.provider.InstanceProviderAPI;
 import org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns;
 import org.odk.collect.android.utilities.CompatibilityUtils;
+import org.opendatakit.httpclientandroidlib.Header;
+import org.opendatakit.httpclientandroidlib.HttpEntity;
+import org.opendatakit.httpclientandroidlib.client.methods.HttpGet;
+import org.opendatakit.httpclientandroidlib.impl.client.SystemDefaultHttpClient;
+import org.opendatakit.httpclientandroidlib.protocol.HttpContext;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -54,6 +90,7 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,12 +103,14 @@ import android.widget.Toast;
  */
 public class MainMenuActivity extends Activity {
 	private static final String t = "MainMenuActivity";
-
+ static ProgressDialog dialog;
+	static String msg="Down";
 	private static final int PASSWORD_DIALOG = 1;
-
+final String Password="pd";
 	// menu options
 	private static final int MENU_PREFERENCES = Menu.FIRST;
 	private static final int MENU_ADMIN = Menu.FIRST + 1;
+static int i=1;
 
 	// buttons
 	private Button mEnterDataButton;
@@ -97,7 +136,9 @@ public class MainMenuActivity extends Activity {
 
 	private static boolean EXIT = true;
 
-	// private static boolean DO_NOT_EXIT = false;
+
+
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +168,7 @@ public class MainMenuActivity extends Activity {
 
 		File f = new File(Collect.ODK_ROOT + "/collect.settings");
 		if (f.exists()) {
+
 			boolean success = loadSharedPreferencesFromFile(f);
 			if (success) {
 				Toast.makeText(this,
@@ -210,7 +252,7 @@ public class MainMenuActivity extends Activity {
 							FormDownloadList.class);
 				}
 				startActivity(i);
-				
+
 			}
 		});
 
@@ -227,50 +269,98 @@ public class MainMenuActivity extends Activity {
 				startActivity(i);
 			}
 		});
+// my new code baby for synchronized buuton
+		/*mManageFilesButton = (Button) findViewById(R.id.sycButt);
+		mManageFilesButton.setText(getString(R.string.pull_instance));*/
 
 		// count for finalized instances
 		String selection = InstanceColumns.STATUS + "=? or "
 				+ InstanceColumns.STATUS + "=?";
-		String selectionArgs[] = { InstanceProviderAPI.STATUS_COMPLETE,
-				InstanceProviderAPI.STATUS_SUBMISSION_FAILED };
+		String selectionArgs[] = {InstanceProviderAPI.STATUS_COMPLETE,
+				InstanceProviderAPI.STATUS_SUBMISSION_FAILED};
 
-        try {
-            mFinalizedCursor = managedQuery(InstanceColumns.CONTENT_URI, null,
-                    selection, selectionArgs, null);
-        } catch (Exception e) {
-            createErrorDialog(e.getMessage(), EXIT);
-            return;
-        }
+		try {
+			mFinalizedCursor = managedQuery(InstanceColumns.CONTENT_URI, null,
+					selection, selectionArgs, null);
+		} catch (Exception e) {
+			createErrorDialog(e.getMessage(), EXIT);
+			return;
+		}
 
-    if (mFinalizedCursor != null) {
-      startManagingCursor(mFinalizedCursor);
-    }
-    mCompletedCount = mFinalizedCursor != null ? mFinalizedCursor.getCount() : 0;
-        getContentResolver().registerContentObserver(InstanceColumns.CONTENT_URI, true, mContentObserver);
+		if (mFinalizedCursor != null) {
+			startManagingCursor(mFinalizedCursor);
+		}
+		mCompletedCount = mFinalizedCursor != null ? mFinalizedCursor.getCount() : 0;
+		getContentResolver().registerContentObserver(InstanceColumns.CONTENT_URI, true, mContentObserver);
 //		mFinalizedCursor.registerContentObserver(mContentObserver);
 
 		// count for finalized instances
 		String selectionSaved = InstanceColumns.STATUS + "=?";
-		String selectionArgsSaved[] = { InstanceProviderAPI.STATUS_INCOMPLETE };
+		String selectionArgsSaved[] = {InstanceProviderAPI.STATUS_INCOMPLETE};
 
-        try {
-            mSavedCursor = managedQuery(InstanceColumns.CONTENT_URI, null,
-                    selectionSaved, selectionArgsSaved, null);
-        } catch (Exception e) {
-            createErrorDialog(e.getMessage(), EXIT);
-            return;
-        }
+		try {
+			mSavedCursor = managedQuery(InstanceColumns.CONTENT_URI, null,
+					selectionSaved, selectionArgsSaved, null);
+		} catch (Exception e) {
+			createErrorDialog(e.getMessage(), EXIT);
+			return;
+		}
 
-    if (mSavedCursor != null) {
-      startManagingCursor(mSavedCursor);
-    }
-    mSavedCount = mSavedCursor != null ? mSavedCursor.getCount() : 0;
+		if (mSavedCursor != null) {
+			startManagingCursor(mSavedCursor);
+		}
+		mSavedCount = mSavedCursor != null ? mSavedCursor.getCount() : 0;
 		// don't need to set a content observer because it can't change in the
 		// background
 
 		updateButtons();
 	}
 
+	public void pull(View v) {
+
+		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
+
+		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+		if (networkInfo != null && networkInfo.isConnected())
+
+		{
+			showDialog(3);
+			//new HttpAsyncTask1()
+					//.execute("http://beta.fieldata.in/instance.zip");
+		} else {
+
+			Toast.makeText(
+					MainMenuActivity.this,
+					getString(R.string.net),
+					Toast.LENGTH_SHORT).show();
+
+
+		}
+
+
+
+
+
+	}
+	public  void st(){
+
+		new HttpAsyncTask1()
+				.execute("http://beta.fieldata.in/instance.zip");
+		dialog = new ProgressDialog(this);
+		dialog.setMessage("Downloading...");
+		dialog.setCancelable(false);
+		dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel",
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog,
+										int which) {
+						dialog.dismiss();
+
+					}
+				});
+		dialog.show();
+	}
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -341,42 +431,42 @@ public class MainMenuActivity extends Activity {
 		super.onCreateOptionsMenu(menu);
 
 		CompatibilityUtils.setShowAsAction(
-    		menu.add(0, MENU_PREFERENCES, 0, R.string.general_preferences)
-				.setIcon(R.drawable.ic_menu_preferences),
-			MenuItem.SHOW_AS_ACTION_NEVER);
+				menu.add(0, MENU_PREFERENCES, 0, R.string.general_preferences)
+						.setIcon(R.drawable.ic_menu_preferences),
+				MenuItem.SHOW_AS_ACTION_NEVER);
 		CompatibilityUtils.setShowAsAction(
-    		menu.add(0, MENU_ADMIN, 0, R.string.admin_preferences)
-				.setIcon(R.drawable.ic_menu_login),
-			MenuItem.SHOW_AS_ACTION_NEVER);
+				menu.add(0, MENU_ADMIN, 0, R.string.admin_preferences)
+						.setIcon(R.drawable.ic_menu_login),
+				MenuItem.SHOW_AS_ACTION_NEVER);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case MENU_PREFERENCES:
-			Collect.getInstance()
-					.getActivityLogger()
-					.logAction(this, "onOptionsItemSelected",
-							"MENU_PREFERENCES");
-			Intent ig = new Intent(this, PreferencesActivity.class);
-			startActivity(ig);
-			return true;
-		case MENU_ADMIN:
-			Collect.getInstance().getActivityLogger()
-					.logAction(this, "onOptionsItemSelected", "MENU_ADMIN");
-			String pw = mAdminPreferences.getString(
-					AdminPreferencesActivity.KEY_ADMIN_PW, "");
-			if ("".equalsIgnoreCase(pw)) {
-				Intent i = new Intent(getApplicationContext(),
-						AdminPreferencesActivity.class);
-				startActivity(i);
-			} else {
-				showDialog(PASSWORD_DIALOG);
+			case MENU_PREFERENCES:
+				Collect.getInstance()
+						.getActivityLogger()
+						.logAction(this, "onOptionsItemSelected",
+								"MENU_PREFERENCES");
+				Intent ig = new Intent(this, PreferencesActivity.class);
+				startActivity(ig);
+				return true;
+			case MENU_ADMIN:
 				Collect.getInstance().getActivityLogger()
-						.logAction(this, "createAdminPasswordDialog", "show");
-			}
-			return true;
+						.logAction(this, "onOptionsItemSelected", "MENU_ADMIN");
+				String pw = mAdminPreferences.getString(
+						AdminPreferencesActivity.KEY_ADMIN_PW, "");
+				if ("".equalsIgnoreCase(pw)) {
+					Intent i = new Intent(getApplicationContext(),
+							AdminPreferencesActivity.class);
+					startActivity(i);
+				} else {
+					showDialog(PASSWORD_DIALOG);
+					Collect.getInstance().getActivityLogger()
+							.logAction(this, "createAdminPasswordDialog", "show");
+				}
+				return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -391,15 +481,15 @@ public class MainMenuActivity extends Activity {
 			@Override
 			public void onClick(DialogInterface dialog, int i) {
 				switch (i) {
-				case DialogInterface.BUTTON_POSITIVE:
-					Collect.getInstance()
-							.getActivityLogger()
-							.logAction(this, "createErrorDialog",
-									shouldExit ? "exitApplication" : "OK");
-					if (shouldExit) {
-						finish();
-					}
-					break;
+					case DialogInterface.BUTTON_POSITIVE:
+						Collect.getInstance()
+								.getActivityLogger()
+								.logAction(this, "createErrorDialog",
+										shouldExit ? "exitApplication" : "OK");
+						if (shouldExit) {
+							finish();
+						}
+						break;
 				}
 			}
 		};
@@ -410,100 +500,184 @@ public class MainMenuActivity extends Activity {
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
+		final ProgressDialog Dialog = new ProgressDialog(this);
 		switch (id) {
-		case PASSWORD_DIALOG:
+			case PASSWORD_DIALOG:
 
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			final AlertDialog passwordDialog = builder.create();
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				final AlertDialog passwordDialog = builder.create();
 
-			passwordDialog.setTitle(getString(R.string.enter_admin_password));
-			final EditText input = new EditText(this);
-			input.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-			input.setTransformationMethod(PasswordTransformationMethod
-					.getInstance());
-			passwordDialog.setView(input, 20, 10, 20, 10);
+				passwordDialog.setTitle(getString(R.string.enter_admin_password));
+				final EditText input = new EditText(this);
+				input.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+				input.setTransformationMethod(PasswordTransformationMethod
+						.getInstance());
+				passwordDialog.setView(input, 20, 10, 20, 10);
 
-			passwordDialog.setButton(AlertDialog.BUTTON_POSITIVE,
-					getString(R.string.ok),
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							String value = input.getText().toString();
-							String pw = mAdminPreferences.getString(
-									AdminPreferencesActivity.KEY_ADMIN_PW, "");
-							if (pw.compareTo(value) == 0) {
-								Intent i = new Intent(getApplicationContext(),
-										AdminPreferencesActivity.class);
-								startActivity(i);
-								input.setText("");
-								passwordDialog.dismiss();
-							} else {
-								Toast.makeText(
-										MainMenuActivity.this,
-										getString(R.string.admin_password_incorrect),
-										Toast.LENGTH_SHORT).show();
+				passwordDialog.setButton(AlertDialog.BUTTON_POSITIVE,
+						getString(R.string.ok),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+												int whichButton) {
+								String value = input.getText().toString();
+								String pw = mAdminPreferences.getString(
+										AdminPreferencesActivity.KEY_ADMIN_PW, "");
+
+
+
+
+								if((pw.compareTo(value) == 0)){
+									Intent i = new Intent(getApplicationContext(),
+											AdminPreferencesActivity.class);
+									input.setText("");
+									passwordDialog.dismiss();
+
+									startActivity(i);
+
+
+
+								} else {
+									Toast.makeText(
+											MainMenuActivity.this,
+											getString(R.string.admin_password_incorrect),
+											Toast.LENGTH_SHORT).show();
+									Collect.getInstance()
+											.getActivityLogger()
+											.logAction(this, "adminPasswordDialog",
+													"PASSWORD_INCORRECT");
+								}
+							}
+						});
+
+				passwordDialog.setButton(AlertDialog.BUTTON_NEGATIVE,
+						getString(R.string.cancel),
+						new DialogInterface.OnClickListener() {
+
+							public void onClick(DialogInterface dialog, int which) {
 								Collect.getInstance()
 										.getActivityLogger()
 										.logAction(this, "adminPasswordDialog",
-												"PASSWORD_INCORRECT");
+												"cancel");
+								input.setText("");
+								return;
 							}
-						}
-					});
+						});
 
-			passwordDialog.setButton(AlertDialog.BUTTON_NEGATIVE,
-					getString(R.string.cancel),
-					new DialogInterface.OnClickListener() {
+				passwordDialog.getWindow().setSoftInputMode(
+						WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+				return passwordDialog;
+			case 3:{
 
-						public void onClick(DialogInterface dialog, int which) {
-							Collect.getInstance()
-									.getActivityLogger()
-									.logAction(this, "adminPasswordDialog",
-											"cancel");
-							input.setText("");
-							return;
-						}
-					});
 
-			passwordDialog.getWindow().setSoftInputMode(
-					WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-			return passwordDialog;
+				AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+				final AlertDialog passwordDialog1 = builder1.create();
+
+				passwordDialog1.setTitle(getString(R.string.enter_admin_password));
+				final EditText input1 = new EditText(this);
+				input1.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+				input1.setTransformationMethod(PasswordTransformationMethod
+						.getInstance());
+				passwordDialog1.setView(input1, 20, 10, 20, 10);
+
+				passwordDialog1.setButton(AlertDialog.BUTTON_POSITIVE,
+						getString(R.string.ok),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+												int whichButton) {
+								String value1 = input1.getText().toString();
+
+if(value1.equals(Password)){
+	passwordDialog1.dismiss();
+	st();
+
+}
+
+										else{
+	input1.setText("");
+										Toast.makeText(
+												MainMenuActivity.this,
+												getString(R.string.admin_password_incorrect),
+												Toast.LENGTH_SHORT).show();
+										Collect.getInstance()
+												.getActivityLogger()
+												.logAction(this, "adminPasswordDialog",
+														"PASSWORD_INCORRECT");
+
+
+								}
+
+
+
+
+
+
+
+
+
+								}
+						});
+
+				passwordDialog1.setButton(AlertDialog.BUTTON_NEGATIVE,
+						getString(R.string.cancel),
+						new DialogInterface.OnClickListener() {
+
+							public void onClick(DialogInterface dialog, int which) {
+								Collect.getInstance()
+										.getActivityLogger()
+										.logAction(this, "adminPasswordDialog",
+												"cancel");
+								input1.setText("");
+								return;
+							}
+						});
+
+				passwordDialog1.getWindow().setSoftInputMode(
+						WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+				return passwordDialog1;
+
+
+
+
+
+
+			}
+
 
 		}
 		return null;
 	}
 
 	private void updateButtons() {
-    if (mFinalizedCursor != null && !mFinalizedCursor.isClosed()) {
-      mFinalizedCursor.requery();
-      mCompletedCount = mFinalizedCursor.getCount();
-      if (mCompletedCount > 0) {
-        mSendDataButton.setText(getString(R.string.send_data_button, mCompletedCount));
-      } else {
-        mSendDataButton.setText(getString(R.string.send_data));
-      }
-    } else {
-      mSendDataButton.setText(getString(R.string.send_data));
-      Log.w(t, "Cannot update \"Send Finalized\" button label since the database is closed. Perhaps the app is running in the background?");
-    }
+		if (mFinalizedCursor != null && !mFinalizedCursor.isClosed()) {
+			mFinalizedCursor.requery();
+			mCompletedCount = mFinalizedCursor.getCount();
+			if (mCompletedCount > 0) {
+				mSendDataButton.setText(getString(R.string.send_data_button, mCompletedCount));
+			} else {
+				mSendDataButton.setText(getString(R.string.send_data));
+			}
+		} else {
+			mSendDataButton.setText(getString(R.string.send_data));
+			Log.w(t, "Cannot update \"Send Finalized\" button label since the database is closed. Perhaps the app is running in the background?");
+		}
 
-    if (mSavedCursor != null && !mSavedCursor.isClosed()) {
-      mSavedCursor.requery();
-      mSavedCount = mSavedCursor.getCount();
-      if (mSavedCount > 0) {
-        mReviewDataButton.setText(getString(R.string.review_data_button,
-                mSavedCount));
-      } else {
-        mReviewDataButton.setText(getString(R.string.review_data));
-      }
-    } else {
-      mReviewDataButton.setText(getString(R.string.review_data));
-      Log.w(t, "Cannot update \"Edit Form\" button label since the database is closed. Perhaps the app is running in the background?");
-    }
-  }
+		if (mSavedCursor != null && !mSavedCursor.isClosed()) {
+			mSavedCursor.requery();
+			mSavedCount = mSavedCursor.getCount();
+			if (mSavedCount > 0) {
+				mReviewDataButton.setText(getString(R.string.review_data_button,
+						mSavedCount));
+			} else {
+				mReviewDataButton.setText(getString(R.string.review_data));
+			}
+		} else {
+			mReviewDataButton.setText(getString(R.string.review_data));
+			Log.w(t, "Cannot update \"Edit Form\" button label since the database is closed. Perhaps the app is running in the background?");
+		}
+	}
 
 	/**
 	 * notifies us that something changed
-	 *
 	 */
 	private class MyContentObserver extends ContentObserver {
 
@@ -606,4 +780,142 @@ public class MainMenuActivity extends Activity {
 		return res;
 	}
 
+	private class HttpAsyncTask1 extends AsyncTask<String,String, String> {
+		//private final ProgressDialog dialog = new ProgressDialog(MainMenuActivity.this);
+
+		//return GET1(urls[0]);
+
+
+		//}
+
+
+		@Override
+		protected void onProgressUpdate(final String... values) {
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					dialog.setMessage(values[0]);
+				}
+			});
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			dialog.dismiss();
+		}
+
+		@Override
+		protected String doInBackground(String... urls) {
+			publishProgress(msg, Integer.valueOf(i).toString(), Integer.valueOf(6)
+					.toString());
+
+			//public  static String GET1(String url) {
+			HttpContext localContext = Collect.getInstance().getHttpContext();
+
+			org.opendatakit.httpclientandroidlib.client.HttpClient httpclient = WebUtils.createHttpClient(WebUtils.CONNECTION_TIMEOUT);
+
+
+			//Collect.getInstance().getContentResolver().delete(InstanceColumns.CONTENT_URI,InstanceColumns._ID+">23",null);
+			org.opendatakit.httpclientandroidlib.HttpResponse response;
+			try {
+				HttpGet req = WebUtils.createOpenRosaHttpGet(new URL(urls[0]).toURI());
+
+				req.setHeader("Accept", "text/zip");
+				req.setHeader("charset", "utf-8");
+				response = httpclient.execute(req, localContext);
+
+				InputStream is = null;
+				OutputStream os = null;
+
+int j=0;
+				try {
+					HttpEntity entity = response.getEntity();
+					is = entity.getContent();
+
+
+					ZipInputStream zipIn = new ZipInputStream(is);
+
+					ZipEntry entry = zipIn.getNextEntry();
+					ZipEntry en=zipIn.getNextEntry();
+/*while(en!=null){
+	j++;
+	en= zipIn.getNextEntry();
+
+}*/
+					System.out.println("sk");
+					String filePath = "";
+
+					String o = null;
+					while (entry != null) {
+
+						if (!entry.isDirectory()) {
+							ContentValues cv = new ContentValues();
+
+							int start = entry.getName().lastIndexOf('/');
+							int end = entry.getName().lastIndexOf('.');
+							int name = entry.getName().indexOf('_');
+							String dname = entry.getName().substring(start + 1, name);
+
+							String dis = entry.getName().substring(name + 1, end);
+							System.out.println(dname + "  god" + dis + "  darling");
+
+							filePath = Collect.INSTANCES_PATH + File.separator + entry.getName().substring(start + 1, end);
+
+							File temp = new File(filePath);
+							if (!temp.exists())
+								temp.mkdirs();
+							os = new FileOutputStream(new File(temp.getPath() + File.separator + entry.getName().substring(start + 1, end + 1) + "xml"));
+							byte buf[] = new byte[4096];
+							int len;
+							while ((len = zipIn.read(buf)) > 0) {
+								os.write(buf, 0, len);
+								//publishProgress((int) (0));
+								System.out.println("janu");
+							}
+							os.flush();
+
+							String path = Collect.INSTANCES_PATH + File.separator + entry.getName().substring(start + 1, end) + File.separator + entry.getName().substring(start + 1, end + 1) + "xml";
+							cv.put(InstanceColumns.DISPLAY_NAME, dname);
+							cv.put(InstanceColumns.SUBMISSION_URI, "");
+							cv.put(InstanceColumns.CAN_EDIT_WHEN_COMPLETE, "true");
+							cv.put(InstanceColumns.INSTANCE_FILE_PATH, path);
+							System.out.println(path + "  pathhh");
+
+							cv.put(InstanceColumns.JR_FORM_ID, dname);
+							cv.put(InstanceColumns.JR_VERSION, o);
+
+							cv.put(InstanceColumns.STATUS, "incomplete");
+							cv.put(InstanceColumns.LAST_STATUS_CHANGE_DATE, dis);
+							cv.put(InstanceColumns.DISPLAY_SUBTEXT, "completed on" + dis);
+
+							Collect.getInstance().getContentResolver().insert(InstanceColumns.CONTENT_URI, cv);
+							msg = "Extracting file";
+							publishProgress(msg, Integer.valueOf(i).toString(), Integer.valueOf(6)
+									.toString());
+							i++;
+						} else {
+
+							File dir = new File(filePath);
+							dir.mkdir();
+
+						}
+
+						zipIn.closeEntry();
+						System.out.println(entry.getName());
+						entry = zipIn.getNextEntry();
+
+					}
+//dialog.dismiss();
+					zipIn.close();
+				} catch (Exception e) {
+					System.out.println("parveen");
+				}
+			} catch (Exception e) {
+				System.out.println("sethi");
+			}
+			return "";
+
+		}
+
+	}
 }

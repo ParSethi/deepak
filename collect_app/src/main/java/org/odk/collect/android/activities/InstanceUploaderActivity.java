@@ -113,6 +113,7 @@ public class InstanceUploaderActivity extends Activity implements InstanceUpload
         if ( selectedInstanceIDs != null ) {
         	for ( int i = 0 ; i < selectedInstanceIDs.length ; ++i ) {
         		mInstancesToSend[i] = selectedInstanceIDs[i];
+                System.out.println(mInstancesToSend[i]+"  iddd");
         	}
         }
 

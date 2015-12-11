@@ -357,6 +357,7 @@ public class FormEntryActivity extends Activity implements AnimationListener,
 								instancePath = instanceCursor
 										.getString(instanceCursor
 												.getColumnIndex(InstanceColumns.INSTANCE_FILE_PATH));
+								System.out.println(instancePath+"   instancepathbaby");
 								Collect.getInstance()
 										.getActivityLogger()
 										.logAction(this, "instanceLoaded",
@@ -386,7 +387,9 @@ public class FormEntryActivity extends Activity implements AnimationListener,
 						selectionArgs = new String[] { jrFormId };
 						selection = FormsColumns.JR_FORM_ID + "=? AND "
 								+ FormsColumns.JR_VERSION + " IS NULL";
+						System.out.println("  jver nulla");
 					} else {
+						System.out.println(jrFormId+"  ver"+jrVersion);
 						selectionArgs = new String[] { jrFormId, jrVersion };
 						selection = FormsColumns.JR_FORM_ID + "=? AND "
 								+ FormsColumns.JR_VERSION + "=?";
@@ -403,6 +406,7 @@ public class FormEntryActivity extends Activity implements AnimationListener,
 								mFormPath = formCursor
 										.getString(formCursor
 												.getColumnIndex(FormsColumns.FORM_FILE_PATH));
+								System.out.println(mFormPath+"   birds path");
 							} else if (formCursor.getCount() < 1) {
 								this.createErrorDialog(
 										getString(
@@ -473,6 +477,7 @@ public class FormEntryActivity extends Activity implements AnimationListener,
 							// explicitly saved by the user...
 							for (int i = 0; i < files.length; ++i) {
 								File candidate = files[i];
+								System.out.println(candidate.getName()+"  cashhh");
 								String instanceDirName = candidate.getName()
 										.substring(
 												0,
