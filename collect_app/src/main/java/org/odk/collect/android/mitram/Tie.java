@@ -27,11 +27,11 @@ import android.widget.TextView;
 
 @SuppressLint("NewApi")
 public class Tie extends Activity {
-    public static String path="/pic/tie.jpg";
+
     public static String type="not possible";
     private static final String t = Tie.class
             .getSimpleName();
-
+    MitramTempTie ti=null;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(t, "msgMSGMSGMSGMSG");
@@ -45,24 +45,33 @@ public class Tie extends Activity {
     }
     public void img(){
         File f;
-
+        MitramParserTie.parseResponseXML();
         ImageView iv=(ImageView) findViewById(R.id.imageview);
+        String path="/odk/pic/tie/"+"t"+type+".jpg";
         f = new File(Environment.getExternalStorageDirectory()+path);
         TextView tx=(TextView)findViewById(R.id.main_menu_header);
         tx.setText("Tie Image");
         Bitmap bMap = BitmapFactory.decodeFile(f.getAbsolutePath());
         iv.setImageBitmap(bMap);
+        TextView tw=(TextView)findViewById(R.id.content);
+        tw.setText("You Left some questions");
+        for(int i=0;i<MitramParserTie.RespodentList.size();i++){
+            System.out.println("object NO"+i);
+            ti=MitramParserTie.RespodentList.get(i);
+            ti.show();
+            tw.setText("Tie Details:\n" + ti.get());
+        }
 
 
-
+        MitramParserTie.icount=0;
 
     }
     public void can(View v){
-        Map<Integer, MitramSaveTie> respodentList = MitramParserTie
-                .getSelectedRespondentList();
+        //Map<Integer, MitramSaveTie> respodentList = MitramParserTie
+              //  .getSelectedRespondentList();
 
 
-        Log.i("Repeat Index",  "" + respodentList.size());
+       // Log.i("Repeat Index",  "" + respodentList.size());
 
 
 
@@ -70,19 +79,25 @@ public class Tie extends Activity {
 
         Intent returnIntent = new Intent();
 
-        MitramSaveTie resp = MitramParserTie
-                .getRespondantByIndex(0);
+      //  MitramSaveTie resp = MitramParserTie
+              //  .getRespondantByIndex(0);
 
-
-        returnIntent.putExtra("Type1", resp.getType());
-        returnIntent.putExtra("Size",resp.getSize());
-        returnIntent.putExtra("Fita",resp.getFita());
-        returnIntent.putExtra("Logo",resp.getLogo());
-        returnIntent.putExtra("ty",type);
+//resp.getLogo()
+        //returnIntent.putExtra("q7_tie", resp.getType());
+        //returnIntent.putExtra("q8_tie",resp.getSize());
+        //returnIntent.putExtra("q9_tie",resp.getFita());
+if(MitramParserTie.RespodentList.size()!=0)
+        returnIntent.putExtra("q5_tie_det", ti.get());
+        else
+    returnIntent.putExtra("q5_tie_det","You Left some questions");
+        //returnIntent.putExtra("q6_tie",type);
 
         setResult(RESULT_OK, returnIntent);
-        finish();
 
+        finish();
+        type="not possible";
+        MitramParserTie.RespodentList.remove(0);
+       // MitramParserTie.RespodentList.remove(0);
 
     }
 }

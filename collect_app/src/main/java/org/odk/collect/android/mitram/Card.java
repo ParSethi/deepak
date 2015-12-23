@@ -9,40 +9,37 @@ import org.odk.collect.android.R;
 
 
 import java.io.File;
-import java.util.Map;
-
-;
-import org.odk.collect.android.application.Collect;
-import org.odk.collect.android.logic.FormController;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
+
 import android.content.Intent;
-import android.os.Bundle;
+
 import android.os.Environment;
-import android.util.Log;
+
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 @SuppressLint("NewApi")
 public class Card extends Activity {
-    public static String path="/pic/tie.jpg";
-    public static String type="not possible";
-    private static final String t = Card.class
-            .getSimpleName();
 
+    public static String type="not possible";
+
+   // private static final String t = Card.class
+          //  .getSimpleName();
+    MitramTempCard t1=null;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(t, "msgMSGMSGMSGMSG");
+
         setContentView(R.layout.activity_card);
-img();
+
+        img();
 
     }
-
     public void img(){
         File f;
-
+        MitramParserCard.parseResponseXML();
+        String path="/odk/pic/card/"+"c"+type+".jpg";
         ImageView iv=(ImageView) findViewById(R.id.imageview);
         f = new File(Environment.getExternalStorageDirectory()+path);
         TextView tx=(TextView)findViewById(R.id.main_menu_header);
@@ -50,18 +47,35 @@ img();
         Bitmap bMap = BitmapFactory.decodeFile(f.getAbsolutePath());
         iv.setImageBitmap(bMap);
 
+        TextView tw=(TextView) findViewById(R.id.content);
+
+
+
+
+        //MitamParser.belt_det="You did not choose some questions";
+        tw.setText("You Left some questions");
+        for(int i=0;i<MitramParserCard.RespodentList.size();i++){
+            System.out.println("object NO"+i);
+            t1=MitramParserCard.RespodentList.get(i);
+
+            t1.show();
+            tw.setText("Card details:\n\n"+t1.get());
+        }
+
+        MitramParserCard.icount=0;
 
 
 
     }
     public void can(View v){
-        Map<Integer, MitramSaveCard> respodentList = MitramParserCard
+        Intent returnIntent = new Intent();
+        /*Map<Integer, MitramSaveCard> respodentList = MitramParserCard
                 .getSelectedRespondentList();
 
         Log.i("Repeat Index",  "" + respodentList.size());
 
 
-        Intent returnIntent = new Intent();
+
 
         MitramSaveCard resp = MitramParserCard
                 .getRespondantByIndex(0);
@@ -95,7 +109,19 @@ img();
 returnIntent.putExtra("Ty2",type);
         returnIntent.putExtra("pro",resp.getPro());
         setResult(RESULT_OK, returnIntent);
+        finish();*/
+        if(MitramParserCard.RespodentList.size()!=0)
+            returnIntent.putExtra("q10_card_det", t1.get());
+        else
+            returnIntent.putExtra("q10_card_det","You left some questions");
+        //MitamParser.icount=0;
+
+        setResult(RESULT_OK, returnIntent);
         finish();
+        type="not possible";
+        MitramParserCard.RespodentList.remove(0);
+
+
 
     }
 }

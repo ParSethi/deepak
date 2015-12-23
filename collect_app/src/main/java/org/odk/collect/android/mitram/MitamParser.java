@@ -22,25 +22,22 @@ import android.util.Log;
 @SuppressLint("NewApi")
 public class MitamParser {
 
-    private static final String t = MitamParser.class
-            .getSimpleName();
-
     private static XmlPullParserFactory pullparserfactory;
     private static XmlPullParser parser;
-
+public static Integer icount=0;
     private static int eventType;
     private static String tagName = null;
     private static String tagValue = null;
 
-    private static Map<Integer,MitramTemp> RespodentList = new LinkedHashMap<Integer,MitramTemp>();
-
-    public static Map<Integer, MitamSave> selectedRespodentList = new LinkedHashMap<Integer, MitamSave>();
-
-
+  public static Map<Integer,MitramTemp> RespodentList = new LinkedHashMap<Integer,MitramTemp>();
+//public static ArrayList<MitramTemp> RespodentList=new ArrayList<MitramTemp>();
+    //public static Map<Integer, MitamSave> selectedRespodentList = new LinkedHashMap<Integer, MitamSave>();
 
 
 
-    public static Map<Integer,MitamSave> getSelectedRespondentList() {
+
+
+   /* public static Map<Integer,MitamSave> getSelectedRespondentList() {
         parseResponseXML();
 
         return selectedRespodentList;
@@ -53,14 +50,14 @@ public class MitamParser {
         Integer in = (Integer) array.get(i);
 
         return (MitamSave) selectedRespodentList.get(in);
-    }
+    }*/
 
 
 
-    private static synchronized void parseResponseXML() {
+    public  static synchronized void parseResponseXML() {
 
-        RespodentList = new LinkedHashMap<Integer, MitramTemp>();
-        selectedRespodentList = new LinkedHashMap<Integer, MitamSave>();
+       // RespodentList = new LinkedHashMap<Integer, MitramTemp>();
+        //selectedRespodentList = new LinkedHashMap<Integer, MitamSave>();
        // motherList = new LinkedHashMap<Integer, String>();
 
         FormController formController = Collect.getInstance()
@@ -84,6 +81,7 @@ public class MitamParser {
             parser.setInput(is, null);
 
             eventType = parser.getEventType();
+            MitramTemp respTemp = null;
 
             String form_id = "";
             while (form_id.isEmpty()) {
@@ -94,18 +92,18 @@ public class MitamParser {
                         break;
                     case XmlPullParser.START_TAG:
                         tagName = parser.getName();
-                        Log.d(t + " tag name1:", tagName);
+
                         if (tagName.equalsIgnoreCase("data")) {
                             form_id = parser.getAttributeValue(0);
-                            Log.d(t + " form_id1:", form_id);
+
                         }
                         break;
                 }
                 eventType = parser.next();
             }
 
-            MitramTemp respTemp = null;
-            Integer icount = 0;
+
+           // Integer icount = 0;
             while (eventType != XmlPullParser.END_DOCUMENT) {
 
                 switch (eventType) {
@@ -119,9 +117,9 @@ public class MitamParser {
 
                         if (tagName.equalsIgnoreCase("data")) {
                             form_id = parser.getAttributeValue(0);
-                            Log.d(t + " form_id:", form_id);
+
                         } else if (tagName.equalsIgnoreCase("q1")) {
-respTemp=new MitramTemp();
+                            respTemp=new MitramTemp();
                            parser.next();
                             tagValue = parser.getText();
 
@@ -161,15 +159,27 @@ respTemp=new MitramTemp();
                             tagValue = parser.getText();
                             System.out.println("colr"+tagValue);
                             respTemp.Clr =Integer.parseInt(tagValue);
-                        } else if (tagName.equalsIgnoreCase("q8")) {
+
+                        }
+                        else if (tagName.equalsIgnoreCase("q_ad_belt")) {
+                            parser.next();
+                            tagValue = parser.getText();
+                            System.out.println("colr1"+tagValue);
+                            respTemp.Clr1 =Integer.parseInt(tagValue);
+
+                        }
+                        else if (tagName.equalsIgnoreCase("q8")) {
                             parser.next();
                             tagValue = parser.getText();
                             System.out.println("size"+tagValue);
                             respTemp.Sz=Integer.parseInt(tagValue);
+                            if(respTemp!=null){
                             GenrateList(respTemp);
+                            RespodentList.put(icount,respTemp);}
+                            icount++;
                         }
 
-                        Log.d(t + " tag name aayush:value", tagName + ":" + tagValue);
+
 
                         break;
                 }
@@ -183,160 +193,202 @@ respTemp=new MitramTemp();
 
     }
     private static void GenrateList(MitramTemp respTemp) {
+        String belt_det="Left some question";
+       // boolean flag=false;
+       // MitamSave resp;
 
-        boolean flag=false;
-        MitamSave resp;
-        if (respTemp != null) {
+System.out.println("inside listtt");
+            String size="";
             Integer i=1;
-            resp = new MitamSave();
+            if(respTemp.Sz==1)
+                size="Size: 70 inch";
+            else if(respTemp.Sz==2)
+                size="Size: 80 inch";
+            else
+            size="Size: 90 inch";
+           // resp = new MitamSave();
 if(respTemp.Buck==1&&respTemp.Nev==1&&respTemp.Lemina==2&&respTemp.Clr==1){
-    resp.setBUck("Iron");
+    belt_det="Buckle: Iron"+"\n\n"+"Nevar: Plastic"+"\n\n"+"Color: Single"+"\n\n"+"Lemination: No"+"\n\n"+size;
+    /*resp.setBUck("Iron");
     resp.setNev("plastic");
     resp.setClr("Single ");
     resp.setLemina("No");
-    flag=true;
+    flag=true;*/
     Belt.type="1";
+    respTemp.put(belt_det);
 
 }
             else if(respTemp.Buck==1&&respTemp.Nev==1&&respTemp.Lemina==1&&respTemp.Clr==2){
+    belt_det="Buckle: Iron"+"\n\n"+"Nevar: Plastic"+"\n\n"+"Color: Double"+"\n\n"+"Lemination: Yes"+"\n\n"+size;
 
-
-        resp.setBUck("Iron");
+       /* resp.setBUck("Iron");
     resp.setNev("plastic");
     resp.setClr("Double ");
         resp.setLemina("Yes");
-    flag=true;
+    flag=true;*/
     Belt.type="2";
+    respTemp.put(belt_det);
 }
 else if(respTemp.Buck==1&&respTemp.Nev==1&&respTemp.Lemina==1&&respTemp.Clr==3){
 
-
-    resp.setBUck("Iron");
+    belt_det="Buckle: Iron"+"\n\n"+"Nevar: Plastic"+"\n\n"+"Color: Multi"+"\n\n"+"Lemination: Yes"+"\n\n"+size;
+   /* resp.setBUck("Iron");
     resp.setNev("plastic");
     resp.setClr("Multi ");
     resp.setLemina("Yes");
-    flag=true;
+    flag=true;*/
     Belt.type="3";
+    respTemp.put(belt_det);
         }
 
 
-else if(respTemp.Buck==2&&respTemp.Nev==1&&respTemp.Pint==1&&respTemp.Clr==1&&respTemp.Pest==2){
+else if(respTemp.Buck==2&&respTemp.Nev==1&&respTemp.Pint==1&&respTemp.Clr1==1&&respTemp.Pest==2){
 
-
-    resp.setBUck("Brass");
+    belt_det="Buckle: Brass"+"\n\n"+"Nevar: Plastic"+"\n\n"+"Color: Single"+"\n\n"+"Pinting: Yes"+"\n\n"+"Pesting: No"+"\n\n"+size;
+   /* resp.setBUck("Brass");
     resp.setNev("plastic");
     resp.setClr("Single ");
     resp.setPint("Yes");
-    flag=true;
+    flag=true;*/
     Belt.type="4";
+    respTemp.put(belt_det);
     }
-else if(respTemp.Buck==2&&respTemp.Nev==1&&respTemp.Pint==2&&respTemp.Clr==2&&respTemp.Pest==1) {
-    resp.setBUck("Brass");
+else if(respTemp.Buck==2&&respTemp.Nev==1&&respTemp.Pint==2&&respTemp.Clr1==2&&respTemp.Pest==1) {
+    belt_det="Buckle: Brass"+"\n\n"+"Nevar: Plastic"+"\n\n"+"Color: Double"+"\n\n"+"Pinting: No"+"\n\n"+"Pesting: Yes"+"\n\n"+size;
+    /*resp.setBUck("Brass");
     resp.setNev("plastic");
     resp.setClr("Double ");
     resp.setPint("NO");
     resp.setpest("Yes");
-    flag=true;
+    flag=true;*/
     Belt.type="5";
+    respTemp.put(belt_det);
 }
 else if(respTemp.Buck==4&&respTemp.Nev==1){
-    resp.setBUck("Meena");
+    belt_det="Buckle: Meena"+"\n\n"+"Nevar: Plastic"+"\n\n"+size;
+    /*resp.setBUck("Meena");
     resp.setNev("plastic");
-    flag=true;
+    flag=true*/;
     Belt.type="6";
-}
-else if(respTemp.Buck==3&&respTemp.Nev==1&&respTemp.Clr==2){
-    resp.setBUck("Fiber");
-    resp.setNev("plastic");
-    resp.setClr("Double");
-    flag=true;
-    BeltImg.type="7";
-} else if(respTemp.Buck==3&&respTemp.Nev==1&&respTemp.Clr==2){
-    resp.setBUck("Fiber");
-    resp.setNev("plastic");
-    resp.setClr("Multi");
-    flag=true;
-    Belt.type="8";
+    respTemp.put(belt_det);
 }
 else if(respTemp.Buck==3&&respTemp.Nev==1&&respTemp.Clr==1){
-    resp.setBUck("Fiber");
+    belt_det="Buckle: Fiber"+"\n\n"+"Nevar: Plastic"+"\n\n"+"Color: Single"+"\n\n"+size;
+    /*resp.setBUck("Fiber");
     resp.setNev("plastic");
     resp.setClr("Single");
-    flag=true;
+
+    flag=true;*/
+    BeltImg.type="7";
+    respTemp.put(belt_det);
+} else if(respTemp.Buck==3&&respTemp.Nev==1&&respTemp.Clr==2){
+    belt_det="Buckle: Fiber"+"\n\n"+"Nevar: Plastic"+"\n\n"+"Color: Double"+"\n\n"+size;
+   /* resp.setBUck("Fiber");
+    resp.setNev("plastic");
+    resp.setClr("Double");
+
+    flag=true;*/
+    Belt.type="8";
+    respTemp.put(belt_det);
+}
+else if(respTemp.Buck==3&& respTemp.Nev==1&&respTemp.Clr == 3) {
+    belt_det="Buckle: Fiber"+"\n\n"+"Nevar: Plastic"+"\n\n"+"Color: Multi"+"\n\n"+size;
+//    resp.setBUck("Fiber");
+//    resp.setNev("plastic");
+//    resp.setClr("Multi");
+//    flag=true;
     Belt.type="9";
+    respTemp.put(belt_det);
 }
 
 
 
 else if(respTemp.Buck==1&&respTemp.Nev==2&&respTemp.Clr==1&&respTemp.Lemina==2){
-    resp.setBUck("Iron");
+    belt_det="Buckle: Iron"+"\n\n"+"Nevar: Cotton"+"\n\n"+"Color: Single"+"\n\n"+"Lemination: No"+"\n\n"+size;
+    /*resp.setBUck("Iron");
     resp.setNev("Cotton");
     resp.setClr("Single");
     resp.setLemina("No");
-    flag=true;
+    flag=true;*/
     Belt.type="10";
+    respTemp.put(belt_det);
 }
 else if(respTemp.Buck==1&&respTemp.Nev==2&&respTemp.Clr==2&&respTemp.Lemina==1){
-    resp.setBUck("Iron");
+    belt_det="Buckle: Iron"+"\n\n"+"Nevar: Cotton"+"\n\n"+"Color: Double"+"\n\n"+"Lemination: Yes"+"\n\n"+size;
+  /*  resp.setBUck("Iron");
     resp.setNev("Cotton");
     resp.setClr("Double");
     resp.setLemina("Yes");
-    flag=true;
+    flag=true;*/
     Belt.type="11";
+    respTemp.put(belt_det);
 }
 else if(respTemp.Buck==1&&respTemp.Nev==2&&respTemp.Clr==3&&respTemp.Lemina==1){
-    resp.setBUck("Iron");
+    belt_det="Buckle: Iron"+"\n\n"+"Nevar: Cotton"+"\n\n"+"Color: Multi"+"\n\n"+"Lemination: Yes"+"\n\n"+size;
+   /* resp.setBUck("Iron");
     resp.setNev("Cotton");
     resp.setClr("Multi");
     resp.setLemina("Yes");
-    flag=true;
+    flag=true;*/
     Belt.type="12";
+    respTemp.put(belt_det);
 }
-else if(respTemp.Buck==2&&respTemp.Nev==2&&respTemp.Clr==1&&respTemp.Pint==1&&respTemp.Pest==2){
-    resp.setBUck("Brass");
+else if(respTemp.Buck==2&&respTemp.Nev==2&&respTemp.Clr1==1&&respTemp.Pint==1&&respTemp.Pest==2){
+    belt_det="Buckle: Brass"+"\n\n"+"Nevar: Cotton"+"\n\n"+"Color: Single"+"\n\n"+"Pinting: Yes"+"\n\n"+"Pesting: No"+"\n\n"+size;
+  /*  resp.setBUck("Brass");
     resp.setNev("Cotton");
     resp.setClr("Single");
     resp.setPint("Yes");
     resp.setpest("No");
-    flag=true;
+    flag=true;*/
     Belt.type="13";
+    respTemp.put(belt_det);
 }
-else if(respTemp.Buck==2&&respTemp.Nev==2&&respTemp.Clr==1&&respTemp.Pint==2&&respTemp.Pest==1){
-    resp.setBUck("Brass");
+else if(respTemp.Buck==2&&respTemp.Nev==2&&respTemp.Clr1==2&&respTemp.Pint==2&&respTemp.Pest==1){
+    belt_det="Buckle: Brass"+"\n\n"+"Nevar: Cotton"+"\n\n"+"Color: Double"+"\n\n"+"Pinting: No"+"\n\n"+"Pesting: Yes"+"\n\n"+size;
+    /*resp.setBUck("Brass");
     resp.setNev("Cotton");
     resp.setClr("Single");
     resp.setPint("No");
     resp.setpest("Yes");
-    flag=true;
+    flag=true;*/
     Belt.type="14";
+    respTemp.put(belt_det);
 }
 else if(respTemp.Buck==4&&respTemp.Nev==2){
-    resp.setBUck("Meena");
+    belt_det="Buckle: Meena"+"\n\n"+"Nevar: Cotton"+"\n\n"+size;
+   /* resp.setBUck("Meena");
     resp.setNev("Cotton");
-    flag=true;
+    flag=true;*/
     Belt.type="15";
+    respTemp.put(belt_det);
 }
 else if(respTemp.Buck==3&&respTemp.Nev==2&&respTemp.Clr==1){
-    resp.setBUck("Fiber");
+    belt_det="Buckle: Fiber"+"\n\n"+"Nevar: Cotton"+"\n\n"+"Color: Single"+"\n\n"+size;
+    /*resp.setBUck("Fiber");
     resp.setNev("Cotton");
     resp.setClr("Single");
-    flag=true;
-    Belt.type="16";       }
+    flag=true;*/
+    Belt.type="16";   respTemp.put(belt_det);     }
 else if(respTemp.Buck==3&&respTemp.Nev==2&&respTemp.Clr==2){
-    resp.setBUck("Fiber");
+    belt_det="Buckle: Fiber"+"\n\n"+"Nevar: Cotton"+"\n\n"+"Color: Double"+"\n\n"+size;
+  /*  resp.setBUck("Fiber");
     resp.setNev("Cotton");
     resp.setClr("Double");
-    flag=true;
-    Belt.type="17";
+    flag=true;*/
+    Belt.type="17"; respTemp.put(belt_det);
 }
 else if(respTemp.Buck==3&&respTemp.Nev==2&&respTemp.Clr==3){
-    resp.setBUck("Fiber");
+    belt_det="Buckle: Fiber"+"\n\n"+"Nevar: Cotton"+"\n\n"+"Color: Multi"+"\n\n"+size;
+    /*resp.setBUck("Fiber");
     resp.setNev("Cotton");
-    flag=true;    resp.setClr("Multi");
-    Belt.type="18";
+    flag=true;    resp.setClr("Multi");*/
+    Belt.type="18"; respTemp.put(belt_det);
 }
-
-else if(respTemp.Buck==3&&respTemp.Nev==2&&respTemp.Clr==3&&respTemp.Pest==1&&respTemp.Pint==2&&respTemp.Coat==2&&respTemp.Lemina==2){
+/*else{ belt_det="You did not choose some questions ";
+Belt.type="not possible";
+}*/
+/*else if(respTemp.Buck==3&&respTemp.Nev==2&&respTemp.Clr==3&&respTemp.Pest==1&&respTemp.Pint==2&&respTemp.Coat==2&&respTemp.Lemina==2){
     resp.setBUck("Fiber");
     resp.setNev("Cotton");
     resp.setClr("Multi");
@@ -347,8 +399,8 @@ else if(respTemp.Buck==3&&respTemp.Nev==2&&respTemp.Clr==3&&respTemp.Pest==1&&re
     flag=true;
     Belt.type="19";
 
-}
-            if(flag)
+}*/
+            /*if(flag)
                 selectedRespodentList.put(i,resp);
 else{
                 resp.setBUck("Wrong Combination");
@@ -362,6 +414,6 @@ else{
                 Belt.type="not possible";
                 selectedRespodentList.put(i, resp);
 
-            }
+            }*/
 
-}}}
+}}

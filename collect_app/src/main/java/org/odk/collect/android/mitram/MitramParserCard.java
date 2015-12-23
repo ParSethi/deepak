@@ -1,16 +1,12 @@
 package org.odk.collect.android.mitram;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
+
 import java.util.LinkedHashMap;
-import java.util.List;
+
 import java.util.Map;
 
-import org.odk.collect.android.mitram.Belt;
-import org.odk.collect.android.mitram.MitamSave;
-import org.odk.collect.android.mitram.MitramTemp;
+
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.logic.FormController;
 import org.xmlpull.v1.XmlPullParser;
@@ -21,9 +17,8 @@ import android.util.Log;
 
 @SuppressLint("NewApi")
 public class MitramParserCard {
-    static String  get_oth=null;
-    private static final String t = MitamParser.class
-            .getSimpleName();
+
+ public static  Integer icount = 0;
 
     private static XmlPullParserFactory pullparserfactory;
     private static XmlPullParser parser;
@@ -32,16 +27,16 @@ public class MitramParserCard {
     private static String tagName = null;
     private static String tagValue = null;
 
-    private static Map<Integer,MitramTemp> RespodentList = new LinkedHashMap<Integer,MitramTemp>();
+    public static Map<Integer,MitramTempCard> RespodentList = new LinkedHashMap<Integer,MitramTempCard>();
 
-    public static Map<Integer, MitramSaveCard> selectedRespodentList = new LinkedHashMap<Integer, MitramSaveCard>();
+    //public static Map<Integer, MitramSaveCard> selectedRespodentList = new LinkedHashMap<Integer, MitramSaveCard>();
 
-    private static Map<Integer, String> motherList = new LinkedHashMap<Integer, String>();
-
-
+    //private static Map<Integer, String> motherList = new LinkedHashMap<Integer, String>();
 
 
-    public static Map<Integer,MitramSaveCard> getSelectedRespondentList() {
+
+
+    /*public static Map<Integer,MitramSaveCard> getSelectedRespondentList() {
         parseResponseXML();
 
         return selectedRespodentList;
@@ -57,12 +52,12 @@ public class MitramParserCard {
     }
 
 
+*/
 
+    public static synchronized void parseResponseXML() {
 
-    private static synchronized void parseResponseXML() {
-
-        RespodentList = new LinkedHashMap<Integer, MitramTemp>();
-        selectedRespodentList = new LinkedHashMap<Integer, MitramSaveCard>();
+       /* RespodentList = new LinkedHashMap<Integer, MitramTemp>();
+        selectedRespodentList = new LinkedHashMap<Integer, MitramSaveCard>();*/
 
 
         FormController formController = Collect.getInstance()
@@ -91,20 +86,20 @@ public class MitramParserCard {
                         break;
                     case XmlPullParser.START_TAG:
                         tagName = parser.getName();
-                        Log.d(t + " tag name1:", tagName);
+
                         if (tagName.equalsIgnoreCase("data")) {
                             form_id = parser.getAttributeValue(0);
-                            Log.d(t + " form_id1:", form_id);
+
                         }
                         break;
                 }
                 eventType = parser.next();
-                System.out.println("bcsadasd");
+
             }
 
 
             MitramTempCard respTemp = null;
-            Integer icount = 0;
+
             while (eventType != XmlPullParser.END_DOCUMENT) {
 
                 switch (eventType) {
@@ -118,16 +113,15 @@ public class MitramParserCard {
 
                         if (tagName.equalsIgnoreCase("data")) {
                             form_id = parser.getAttributeValue(0);
-                            Log.d(t + " form_id:", form_id);
+
 
                         }
                         else if (tagName.equals("q1_icrd")) {
-                            System.out.println("Dr baby");
                             respTemp=new MitramTempCard();
                             parser.next();
                             tagValue = parser.getText();
 
-
+System.out.println("type "+tagValue);
                             respTemp.typec =Integer.parseInt(tagValue);
 
 
@@ -135,149 +129,122 @@ public class MitramParserCard {
                             parser.next();
 
                             tagValue = parser.getText();
-
+                            System.out.println("orn "+tagValue);
                             respTemp.orn = Integer.parseInt(tagValue);
                         } else if (tagName.equalsIgnoreCase("q3_icrd")) {
                             parser.next();
                             tagValue = parser.getText();
-
+                            System.out.println("prnt"+tagValue);
                             respTemp.prnt = Integer.parseInt(tagValue);
                         }
 
-                        else if (tagName.equalsIgnoreCase("q4_icrd_a")) {
+                        else if (tagName.equalsIgnoreCase("q4_icrd_1")) {
                             parser.next();
                             tagValue = parser.getText();
-
-                            respTemp.hangta = Integer.parseInt(tagValue);
+                            System.out.println("hamgtm "+tagValue);
+                            respTemp.hangtm = Integer.parseInt(tagValue);
                         }
-                        else if (tagName.equalsIgnoreCase("q4_icrd_b")) {
+                        else if (tagName.equalsIgnoreCase("q4_icrd_2")) {
                             parser.next();
                             tagValue = parser.getText();
-
-                            respTemp.hangm = Integer.parseInt(tagValue);
+                            System.out.println("hamga "+tagValue);
+                            respTemp.hanga = Integer.parseInt(tagValue);
                         }
 
                         else if (tagName.equalsIgnoreCase("q4_icrd_c")) {
                             parser.next();
                             tagValue = parser.getText();
-
+                            System.out.println("hangps "+tagValue);
                             respTemp.hangps = Integer.parseInt(tagValue);
                         }
                         else if (tagName.equalsIgnoreCase("q4_icrd_d")) {
                             parser.next();
                             tagValue = parser.getText();
-
+                            System.out.println("hangpp"+tagValue);
                             respTemp.hangpp = Integer.parseInt(tagValue);
                         }
-                        else if (tagName.equalsIgnoreCase("q4_icrd_e")) {
-                            parser.next();
-                            tagValue = parser.getText();
 
-                            respTemp.hangl = Integer.parseInt(tagValue);
-                        }
-
-                        else if (tagName.equalsIgnoreCase("q4_icrd_sa")) {
-                            parser.next();
-                            tagValue = parser.getText();
-
-                            respTemp.szs = Integer.parseInt(tagValue);
-                        }
                         else if (tagName.equalsIgnoreCase("q4_icrd_fa")) {
                             parser.next();
                             tagValue = parser.getText();
-
+                            System.out.println("szs "+tagValue);
+                            respTemp.szs = Integer.parseInt(tagValue);
+                        }
+                        else if (tagName.equalsIgnoreCase("q4_icrd_sa")) {
+                            parser.next();
+                            tagValue = parser.getText();
+                            System.out.println("szf "+tagValue);
                             respTemp.szf = Integer.parseInt(tagValue);
                         }
                         else if (tagName.equalsIgnoreCase("q4_icrd_r")) {
                             parser.next();
                             tagValue = parser.getText();
-
+                            System.out.println("szr"+tagValue);
                             respTemp.szr = Integer.parseInt(tagValue);
                         }
-                        else if (tagName.equalsIgnoreCase("q4_icrd_o")) {
+
+                        else if (tagName.equalsIgnoreCase("q5_icrd_a")) {
                             parser.next();
                             tagValue = parser.getText();
-
-                            respTemp.szo = Integer.parseInt(tagValue);
-                        }
-                        else if (tagName.equalsIgnoreCase("q5_icrd")) {
-                            parser.next();
-                            tagValue = parser.getText();
-
+                            System.out.println("clp "+tagValue);
                             respTemp.clp = Integer.parseInt(tagValue);
+                        }
+                        else if (tagName.equalsIgnoreCase("q5_icrd_b")) {
+                            parser.next();
+                            tagValue = parser.getText();
+                            System.out.println("clpoth "+tagValue);
+                            respTemp.clpoth = Integer.parseInt(tagValue);
                         }
                         else if (tagName.equalsIgnoreCase("q6_icrd")) {
                             parser.next();
                             tagValue = parser.getText();
-
+                            System.out.println("hold "+tagValue);
                             respTemp.hold = Integer.parseInt(tagValue);
                         }
-                        else if (tagName.equalsIgnoreCase("q6_icrd_a")) {
-                            parser.next();
-                            tagValue = parser.getText();
-                            System.out.println("insert  "+tagValue);
-                            respTemp.holdi = Integer.parseInt(tagValue);
-                        }
+
                         else if (tagName.equalsIgnoreCase("q6_icrd_a_1")) {
                             parser.next();
                             tagValue = parser.getText();
-System.out.println("crystal  "+tagValue);
-                            respTemp.holdic= Integer.parseInt(tagValue);
+
+                            System.out.println("holdm "+tagValue);
+                            respTemp.holdm= Integer.parseInt(tagValue);
                         }
                         else if (tagName.equalsIgnoreCase("q6_icrd_b")) {
                             parser.next();
                             tagValue = parser.getText();
-
-                            respTemp.holdp= Integer.parseInt(tagValue);
+                            System.out.println("holdl "+tagValue);
+                            respTemp.holdl= Integer.parseInt(tagValue);
                         }
-                        else if (tagName.equalsIgnoreCase("q6_icrd_b_1")) {
+
+                        else if (tagName.equalsIgnoreCase("q6_icrd_a")) {
                             parser.next();
                             tagValue = parser.getText();
-
-                            respTemp.holdps = Integer.parseInt(tagValue);
+                            System.out.println("insert "+tagValue);
+                            respTemp.insert = Integer.parseInt(tagValue);
                         }
-
                         else if (tagName.equalsIgnoreCase("q7_icrd")) {
                             parser.next();
                             tagValue = parser.getText();
-
+                            System.out.println("card "+tagValue);
                             respTemp.card = Integer.parseInt(tagValue);
                         }
-                        else if (tagName.equalsIgnoreCase("q7_icrd_a")) {
-                            parser.next();
-                            tagValue = parser.getText();
 
-                            respTemp.cardp = Integer.parseInt(tagValue);
-                        }
-                        else if (tagName.equalsIgnoreCase("q7_icrd_b")) {
-                            parser.next();
-                            tagValue = parser.getText();
 
-                            respTemp.cardpl = Integer.parseInt(tagValue);
-                        }
-                        else if (tagName.equalsIgnoreCase("q8_icrd")) {
-                            parser.next();
-                            tagValue = parser.getText();
-
-                            respTemp.lamin = Integer.parseInt(tagValue);
-                        }  else if (tagName.equalsIgnoreCase("q8_icrd_oth")) {
-                            parser.next();
-                            tagValue = parser.getText();
-
-                            get_oth=tagValue;
-                        }
 
                         else if (tagName.equalsIgnoreCase("q9_icrd")) {
 
 
                                 parser.next();
                             tagValue = parser.getText();
+                            System.out.println("pro "+tagValue);
+                            respTemp.pro = Integer.parseInt(tagValue);
 
 
-
-                           respTemp.pro = Integer.parseInt(tagValue);
+if(respTemp!=null){
 
                             GenrateList(respTemp);
+    RespodentList.put(icount, respTemp);
+}
                         }
 
 
@@ -295,351 +262,207 @@ System.out.println("crystal  "+tagValue);
 
     }
     private static void GenrateList(MitramTempCard respTemp) {
-
-        boolean flag=false;
-        MitramSaveCard resp;
-        if (respTemp != null) {
-            Integer i=1;
-            resp = new MitramSaveCard();
-if(respTemp.typec==1&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==1&&respTemp.szs==1&&respTemp.clp==3){
-resp.setType("Tall-wide");
-    if(respTemp.orn==1)
-    resp.setOrn("tall");
-    else
-    resp.setOrn("wide");
-    resp.setHangta("satin");
-    resp.setSzs("12 mm");
-resp.setClp("No clip");
-flag=true;
+String card_del="";
+        String prnt="";
+        String pro="";
+        System.out.println("prvnn");
+        String szs,szr,szf,insert="";
+        if(respTemp.prnt==1)
+            prnt="Single";
+        else
+            prnt="Double";
+        if(respTemp.pro==1)
+            pro="Photo Scan";
+        else if(respTemp.pro==2)
+            pro="Signature Scan";
+        else if(respTemp.pro==3)
+            pro="Data Entry";
+        else
+            pro="Job/Crop";
+if(respTemp.szf==1)
+    szf="12";
+        else if(respTemp.szf==2)
+    szf="16";
+        else szf="20";
+        if(respTemp.szs==1)
+            szs="12";
+        else
+            szs="14";
+        if(respTemp.szr==1)
+            szr="Local";
+        else szr="Standard";
+        if(respTemp.insert==1)
+            insert="Jhopdi";
+        else if(respTemp.insert==2)
+            insert="Box";
+        else if(respTemp.insert==3)
+            insert="Thumb";
+        else
+        insert="Crystal";
+        String  orn="";
+if(respTemp.orn==1)
+    orn="Tall";
+        else
+orn="wide";
+String hanger="";
+    System.out.println(prnt+"\n"+pro+"\n"+szf+"\n"+orn);
+if(respTemp.typec==1&&respTemp.orn!=0&respTemp.prnt==1&respTemp.hangtm==1&&respTemp.szf!=0&&respTemp.clp!=0&&respTemp.pro!=0){
+System.out.println("inside genera");
+card_del="Type: Tall-wide card"+"\n\n"+"Orientation: "+orn+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Flat"+"\n\n"+"Size:"+szf+"\n\n"+"Clip: Plastic"+"\n\n"+"Processing: "+pro;
 Card.type="1";
+    respTemp.put(card_del);
 
 }
-            else if(respTemp.typec==1&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==1&&respTemp.szs==2&&respTemp.clp==3){
-                resp.setType("Tall-wide");
-    if(respTemp.orn==1)
-        resp.setOrn("tall");
-    else
-        resp.setOrn("wide");
-    resp.setHangta("satin");
-    resp.setSzs("16 mm");
-                resp.setClp("No clip");
-    flag=true;
-    Card.type="2";
+       else if(respTemp.typec==1&&respTemp.orn!=0&respTemp.prnt==2&respTemp.hangtm==1&&respTemp.szf!=0&&respTemp.clp!=0&&respTemp.pro!=0){
 
-            }
-          else if(respTemp.typec==1&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==1&&respTemp.szs==3&&respTemp.clp==3){
-                resp.setType("Tall-wide");
-    if(respTemp.orn == 1)
-        resp.setOrn("tall");
-    else
-        resp.setOrn("wide");
-    resp.setHangta("satin");
-    resp.setSzs("20 mm");
-                resp.setClp("No clip");
-                Card.type="3";
-    flag=true;
-            }
+            card_del="Type: Tall-wide card"+"\n\n"+"Orientation: "+orn+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Flat"+"\n\n"+"Size:"+szf+"\n\n"+"Clip: Plastic"+"\n\n"+"Processing: "+pro;
+            Card.type="2";
+    respTemp.put(card_del);
+        }
+else if(respTemp.typec==1&&respTemp.orn!=0&respTemp.prnt==1&respTemp.hangtm==2&&respTemp.szs!=0&&respTemp.pro!=0){
 
-           else if(respTemp.typec==1&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==2&&respTemp.szf==1&&respTemp.clp == 1){
-    resp.setType("Tall-wide");
-    if(respTemp.orn == 1)
-        resp.setOrn("tall");
-    else
-        resp.setOrn("wide");
-    resp.setHangta("flat");
-    resp.setSzf("12 mm");
-                resp.setClp("palstic clip");
-                Card.type="4";
-    flag=true;
+    card_del="Type: Tall-wide card"+"\n\n"+"Orientation: "+orn+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Satin"+"\n\n"+"Size:"+szs+"\n\n"+"Processing: "+pro;
+    Card.type="3";
+    respTemp.put(card_del);
 
-            }
-else if(respTemp.typec==1&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==2&&respTemp.szf==2&&respTemp.clp == 1){
-    resp.setType("Tall-wide");
-    if(respTemp.orn==1)
-        resp.setOrn("tall");
-    else
-        resp.setOrn("wide");
-    resp.setHangta("flat");
-    resp.setSzf("14 mm");
-    resp.setClp("palstic clip");
-    Card.type="5";
-    flag=true;
+}else if(respTemp.typec==1&&respTemp.orn!=0&respTemp.prnt==2&respTemp.hangtm==2&&respTemp.szs!=0&&respTemp.pro!=0){
+
+    card_del="Type: Tall-wide card"+"\n\n"+"Orientation: "+orn+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Satin"+"\n\n"+"Size:"+szs+"\n\n"+"Processing: "+pro;
+    Card.type="4";
+    respTemp.put(card_del);
 
 }
-else if(respTemp.typec==1&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==3&&respTemp.szr==1){
-    resp.setType("Tall-wide");
-    if(respTemp.orn==1)
-        resp.setOrn("tall");
+       else if(respTemp.typec==2&&respTemp.orn!=0&respTemp.prnt==1&(respTemp.hanga==2||respTemp.hanga==3)&&respTemp.szr!=0&&respTemp.clpoth!=0&&respTemp.hold!=0&&respTemp.insert!=0&&respTemp.pro!=0){
+if(respTemp.hanga==2)
+    hanger="Round";
     else
-        resp.setOrn("wide");
-    resp.setHangta("Round");
-    resp.setSzr("Local");
-    flag=true;
+hanger="Oval";
+            card_del="Type: Atm card"+"\n\n"+"Orientation: "+orn+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger:"+hanger+"\n\n"+"Size:"+szr+"\n\n"+"Clip: Silver"+"\n\n"+"card holder insert: "+insert+"\n\n"+"Processing: "+pro;
+            Card.type="5";
+    respTemp.put(card_del);
+
+        }
+
+else if(respTemp.typec==2&&respTemp.orn!=0&respTemp.prnt==2&(respTemp.hanga==2||respTemp.hanga==3)&&respTemp.szr!=0&&respTemp.clpoth!=0&&respTemp.hold!=0&&respTemp.insert!=0&&respTemp.pro!=0){
+    if(respTemp.hanga==2)
+        hanger="Round";
+    else
+        hanger="Oval";
+    card_del="Type: Atm card"+"\n\n"+"Orientation: "+orn+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger:"+hanger+"\n\n"+"Size:"+szr+"\n\n"+"Clip: Silver"+"\n\n"+"card holder insert: "+insert+"\n\n"+"Processing: "+pro;
     Card.type="6";
+    respTemp.put(card_del);
 
-} else if(respTemp.typec==1&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==3&&respTemp.szr==2){
-    resp.setType("Tall-wide");
-    if(respTemp.orn==1)
-        resp.setOrn("tall");
-    else
-        resp.setOrn("wide");
-    resp.setHangta("Round");
-    resp.setSzr("Standard");
+}
+else if(respTemp.typec==2&&respTemp.orn!=0&respTemp.prnt==1&respTemp.hanga==1&&respTemp.szs!=0&&respTemp.clpoth!=0&&respTemp.hold!=0&&respTemp.insert!=0&&respTemp.pro!=0){
+
+    card_del="Type: Atm card"+"\n\n"+"Orientation: "+orn+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Satin"+"\n\n"+"Size:"+szs+"\n\n"+"Clip: Silver"+"\n\n"+"card holder insert: "+insert+"\n\n"+"Processing: "+pro;
     Card.type="7";
-    flag=true;
+    respTemp.put(card_del);
+
 }
-else if(respTemp.typec==1&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==4&&respTemp.szo==1){
-    resp.setType("Tall-wide");
-    if(respTemp.orn==1)
-        resp.setOrn("tall");
-    else
-        resp.setOrn("wide");
-    resp.setHangta("Oval");
-    resp.setSzr("Local");
+else if(respTemp.typec==2&&respTemp.orn!=0&respTemp.prnt==2&respTemp.hanga==1&&respTemp.szs!=0&&respTemp.clpoth!=0&&respTemp.hold!=0&&respTemp.insert!=0&&respTemp.pro!=0){
+
+    card_del="Type: Atm card"+"\n\n"+"Orientation: "+orn+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Satin"+"\n\n"+"Size:"+szs+"\n\n"+"Clip: Silver"+"\n\n"+"card holder insert: "+insert+"\n\n"+"Processing: "+pro;
     Card.type="8";
-    flag=true;
+    respTemp.put(card_del);
 
 }
-else if(respTemp.typec==1&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==4&&respTemp.szo==2){
-    resp.setType("Tall-wide");
-    if(respTemp.orn==1)
-        resp.setOrn("tall");
-    else
-        resp.setOrn("wide");
-    resp.setHangta("Oval");
-    resp.setSzr("Standard");
+        else if(respTemp.typec==3&&respTemp.prnt==1&&respTemp.szf!=0&&respTemp.hangtm==1&&respTemp.clpoth!=0&&respTemp.holdm!=0&&respTemp.pro!=0){
+
+    card_del="Type: Mini card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Flat"+"\n\n"+"Size:"+szf+"\n\n"+"Clip: Silver"+"\n\n"+"card holder :Pesting"+"\n\n"+"Processing: "+pro;
+
     Card.type="9";
-    flag=true;
+    respTemp.put(card_del);
+}
+else if(respTemp.typec==3&&respTemp.prnt==1&&respTemp.szs!=0&&respTemp.hangtm==2&&respTemp.clpoth!=0&&respTemp.holdm!=0&&respTemp.pro!=0){
+
+    card_del="Type: Mini card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Satin"+"\n\n"+"Size:"+szs+"\n\n"+"Clip: Silver"+"\n\n"+"card holder :Pesting"+"\n\n"+"Processing: "+pro;
+
+    Card.type="10";
+    respTemp.put(card_del);
+}
+else if(respTemp.typec==3&&respTemp.prnt==2&&respTemp.szf!=0&&respTemp.hangtm==1&&respTemp.clpoth!=0&&respTemp.holdm!=0&&respTemp.pro!=0){
+
+    card_del="Type: Mini card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Flat"+"\n\n"+"Size:"+szf+"\n\n"+"Clip: Silver"+"\n\n"+"card holder :Pesting"+"\n\n"+"Processing: "+pro;
+
+    Card.type="11";
+    respTemp.put(card_del);
+}
+else if(respTemp.typec==3&&respTemp.prnt==2&&respTemp.szs!=0&&respTemp.hangtm==2&&respTemp.clpoth!=0&&respTemp.holdm!=0&&respTemp.pro!=0){
+
+    card_del="Type: Mini card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Satin"+"\n\n"+"Size:"+szs+"\n\n"+"Clip: Silver"+"\n\n"+"card holder :Pesting"+"\n\n"+"Processing: "+pro;
+
+    Card.type="12";
+    respTemp.put(card_del);
+}
+else if(respTemp.typec==4&&respTemp.prnt==1&&respTemp.card!=0&respTemp.hangps==1&&respTemp.szf!=0&&respTemp.clpoth!=0&&respTemp.hold!=0&&respTemp.insert!=0&&respTemp.pro!=0){
+
+    card_del="Type: Pouch Standard card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Flat"+"\n\n"+"Size:"+szf+"\n\n"+"Clip: Silver"+"\n\n"+"card holder insert: "+insert+"\n\n"+"card :Board paper"+"\n\n"+"Processing: "+pro;
+    Card.type="13";
+    respTemp.put(card_del);
+
+}else if(respTemp.typec==4&&respTemp.prnt==2&&respTemp.card!=0&respTemp.hangps==1&&respTemp.szf!=0&&respTemp.clpoth!=0&&respTemp.hold!=0&&respTemp.insert!=0&&respTemp.pro!=0){
+
+    card_del="Type: Pouch Standard card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Flat"+"\n\n"+"Size:"+szf+"\n\n"+"Clip: Silver"+"\n\n"+"card holder insert: "+insert+"\n\n"+"card :Board paper"+"\n\n"+"Processing: "+pro;
+    Card.type="14";
+    respTemp.put(card_del);
+
+}
+else if(respTemp.typec==4&&respTemp.prnt==1&&respTemp.card!=0&respTemp.hangps==2&&respTemp.clpoth!=0&&respTemp.hold!=0&&respTemp.insert!=0&&respTemp.pro!=0){
+
+    card_del="Type: Pouch Standard card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Dori"+"\n\n"+"Clip: Silver"+"\n\n"+"card holder insert: "+insert+"\n\n"+"card :Board paper"+"\n\n"+"Processing: "+pro;
+    Card.type="15";
+    respTemp.put(card_del);
+
+}
+else if(respTemp.typec==4&&respTemp.prnt==2&&respTemp.card!=0&respTemp.hangps==2&&respTemp.clpoth!=0&&respTemp.hold!=0&&respTemp.insert!=0&&respTemp.pro!=0){
+
+    card_del="Type: Pouch Standard card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Dori"+"\n\n"+"Clip: Silver"+"\n\n"+"card holder insert: "+insert+"\n\n"+"card :Board paper"+"\n\n"+"Processing: "+pro;
+    Card.type="16";
+    respTemp.put(card_del);
+
+}
+else if(respTemp.typec==5&&respTemp.prnt==1&&respTemp.card!=0&respTemp.hangpp==1&&respTemp.szs!=0&&respTemp.clpoth!=0&&respTemp.hold!=0&&respTemp.insert!=0&&respTemp.pro!=0){
+
+    card_del="Type: Pouch Premium card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Satin"+"\n\n"+"Size:"+szs+"\n\n"+"Clip: Silver"+"\n\n"+"card holder insert: "+insert+"\n\n"+"card :Board paper"+"\n\n"+"Processing: "+pro;
+    Card.type="17";
+    respTemp.put(card_del);
+}
+else if(respTemp.typec==5&&respTemp.prnt==2&&respTemp.card!=0&respTemp.hangpp==1&&respTemp.szs!=0&&respTemp.clpoth!=0&&respTemp.hold!=0&&respTemp.insert!=0&&respTemp.pro!=0){
+
+    card_del="Type: Pouch Premium card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Satin"+"\n\n"+"Size:"+szs+"\n\n"+"Clip: Silver"+"\n\n"+"card holder insert: "+insert+"\n\n"+"card :Board paper"+"\n\n"+"Processing: "+pro;
+    Card.type="18";
+    respTemp.put(card_del);
 
 }
 
-            //atm cardstart
-            if(respTemp.typec==2&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==1&&respTemp.szs==1&&respTemp.clp==2&&respTemp.hold==1){
-                resp.setType("Atm");
-                if(respTemp.orn==1)
-                    resp.setOrn("tall");
-                else
-                    resp.setOrn("wide");
-                resp.setHold("insert");
-                if(respTemp.holdi==1)
-                resp.setHoldi("Jhopdi");
-                else if(respTemp.holdi==2)
-                    resp.setHoldi("Box");
-                else if(respTemp.holdi==3)
-                    resp.setHoldi("thumb");
-                else if(respTemp.holdi==5)
-                    resp.setHoldi("pouch");
-                else{
-                    resp.setHoldi("Crystal");
-                if(respTemp.holdic==1)
-                    resp.setHoldic("Single");
-                    else
-                    resp.setHoldic("Double");
-                }
+else if(respTemp.typec==6&&respTemp.prnt==1&&respTemp.card!=0&respTemp.hangps==1&&respTemp.szf!=0&&respTemp.clpoth!=0&&respTemp.holdl!=0&&respTemp.pro!=0){
 
-                resp.setHangta("satin");
-                resp.setSzs("12 mm");
-                resp.setClp("Silver clip");
-                flag=true;
-                Card.type="10";
+    card_del="Type: Lamination card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Flat"+"\n\n"+"Size:"+szf+"\n\n"+"Clip: Silver"+"\n\n"+"card holder Laminated: "+"\n\n"+"card :Board paper"+"\n\n"+"Processing: "+pro;
+    Card.type="19";
+    respTemp.put(card_del);
 
-            }
-            else if(respTemp.typec==2&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==1&&respTemp.szs==2&&respTemp.clp==2&&respTemp.hold==1){
-                resp.setType("Atm");
-                if(respTemp.orn==1)
-                    resp.setOrn("tall");
-                else
-                    resp.setOrn("wide");
-                resp.setHold("insert");
-                if(respTemp.holdi==1)
-                    resp.setHoldi("Jhopdi");
-                else if(respTemp.holdi==2)
-                    resp.setHoldi("Box");
-                else if(respTemp.holdi==3)
-                    resp.setHoldi("thumb");
-                else if(respTemp.holdi==5)
-                    resp.setHoldi("pouch");
-                else{
-                    resp.setHoldi("Crystal");
-                    if(respTemp.holdic==1)
-                        resp.setHoldic("Single");
-                    else
-                        resp.setHoldic("Double");
-                }
-                resp.setHangta("satin");
-                resp.setSzs("16 mm");
-                resp.setClp("Silver clip");
-                flag=true;
-                Card.type="11";
+}
+else if(respTemp.typec==6&&respTemp.prnt==2&&respTemp.card!=0&respTemp.hangps==1&&respTemp.szf!=0&&respTemp.clpoth!=0&&respTemp.holdl!=0&&respTemp.pro!=0){
 
-            }
-            else if(respTemp.typec==2&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==1&&respTemp.szs==3&&respTemp.clp==2&&respTemp.hold==1){
-                resp.setType("Atm");
-                if(respTemp.orn==1)
-                    resp.setOrn("tall");
-                else
-                    resp.setOrn("wide");
-                resp.setHangta("satin");
-                resp.setHold("insert");
-                if(respTemp.holdi==1)
-                    resp.setHoldi("Jhopdi");
-                else if(respTemp.holdi==2)
-                    resp.setHoldi("Box");
-                else if(respTemp.holdi==3)
-                    resp.setHoldi("thumb");
-                else if(respTemp.holdi==5)
-                    resp.setHoldi("pouch");
-                else{
-                    resp.setHoldi("Crystal");
-                    if(respTemp.holdic==1)
-                        resp.setHoldic("Single");
-                    else
-                        resp.setHoldic("Double");
-                }
-                resp.setSzs("20 mm");
-                resp.setClp("Silver clip");
-                Card.type="12";
-                flag=true;
-            }
+    card_del="Type: Lamination card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Flat"+"\n\n"+"Size:"+szf+"\n\n"+"Clip: Silver"+"\n\n"+"card holder Laminated: "+"\n\n"+"card :Board paper"+"\n\n"+"Processing: "+pro;
+    Card.type="20";
+    respTemp.put(card_del);
 
+}
+else if(respTemp.typec==6&&respTemp.prnt==1&&respTemp.card!=0&respTemp.hangps==2&&respTemp.clpoth!=0&&respTemp.holdl!=0&&respTemp.pro!=0){
 
-            else if(respTemp.typec==2&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==3&&respTemp.szr==1&&respTemp.clp==2&&respTemp.hold==1){
-                resp.setType("Atm");
-                if(respTemp.orn==1)
-                    resp.setOrn("tall");
-                else
-                    resp.setOrn("wide");
-                resp.setClp("Silver clip");
-                resp.setHold("insert");
-                if(respTemp.holdi==1)
-                    resp.setHoldi("Jhopdi");
-                else if(respTemp.holdi==2)
-                    resp.setHoldi("Box");
-                else if(respTemp.holdi==3)
-                    resp.setHoldi("thumb");
-                else if(respTemp.holdi==5)
-                    resp.setHoldi("pouch");
-                else{
-                    resp.setHoldi("Crystal");
-                    if(respTemp.holdic==1)
-                        resp.setHoldic("Single");
-                    else
-                        resp.setHoldic("Double");
-                }
-                resp.setHangta("Round");
-                resp.setSzr("Local");
-                flag=true;
-                Card.type="13";
+    card_del="Type: Lamination card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Dori"+"\n\n"+"Clip: Silver"+"\n\n"+"card holder Laminated: "+"\n\n"+"card :Board paper"+"\n\n"+"Processing: "+pro;
+    Card.type="21";
+    respTemp.put(card_del);
 
-            } else if(respTemp.typec==2&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==3&&respTemp.szr==2&&respTemp.clp==2&&respTemp.hold==1){
-                resp.setType("Atm");
-                if(respTemp.orn==1)
-                    resp.setOrn("tall");
-                else
-                    resp.setOrn("wide");
-                resp.setHangta("Round");
-                resp.setHold("insert");
-                if(respTemp.holdi==1)
-                    resp.setHoldi("Jhopdi");
-                else if(respTemp.holdi==2)
-                    resp.setHoldi("Box");
-                else if(respTemp.holdi==3)
-                    resp.setHoldi("thumb");
-                else if(respTemp.holdi==5)
-                    resp.setHoldi("pouch");
-                else{
-                    resp.setHoldi("Crystal");
-                    if(respTemp.holdic==1)
-                        resp.setHoldic("Single");
-                    else
-                        resp.setHoldic("Double");
-                }
-                resp.setClp("Silver clip");
-                resp.setSzr("Standard");
-                Card.type="14";
-                flag=true;
-            }
-            else if(respTemp.typec==2&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==4&&respTemp.szo==1&&respTemp.clp==2&&respTemp.hold==1){
-                resp.setType("Atm");
-                if(respTemp.orn==1)
-                    resp.setOrn("tall");
-                else
-                    resp.setOrn("wide");
-                resp.setHold("insert");
-                if(respTemp.holdi==1)
-                    resp.setHoldi("Jhopdi");
-                else if(respTemp.holdi==2)
-                    resp.setHoldi("Box");
-                else if(respTemp.holdi==3)
-                    resp.setHoldi("thumb");
-                else if(respTemp.holdi==5)
-                    resp.setHoldi("pouch");
-                else{
-                    resp.setHoldi("Crystal");
-                    if(respTemp.holdic==1)
-                        resp.setHoldic("Single");
-                    else
-                        resp.setHoldic("Double");
-                }
-                resp.setClp("Silver clip");
-                resp.setHangta("Oval");
-                resp.setSzr("Local");
-                Card.type="15";
-                flag=true;
+}
+else if(respTemp.typec==6&&respTemp.prnt==2&&respTemp.card!=0&respTemp.hangps==2&&respTemp.clpoth!=0&&respTemp.holdl!=0&&respTemp.pro!=0){
 
-            }
-            else if(respTemp.typec==2&&(respTemp.orn==1||respTemp.orn==2)&&respTemp.hangta==4&&respTemp.szo==2&&respTemp.clp==2&&respTemp.hold==1){
-                resp.setType("Atm");
-                if(respTemp.orn==1)
-                    resp.setOrn("tall");
-                else
-                    resp.setOrn("wide");
-                resp.setHold("insert");
-                if(respTemp.holdi==1)
-                    resp.setHoldi("Jhopdi");
-                else if(respTemp.holdi==2)
-                    resp.setHoldi("Box");
-                else if(respTemp.holdi==3)
-                    resp.setHoldi("thumb");
-                else if(respTemp.holdi==5)
-                    resp.setHoldi("pouch");
-                else{
-                    resp.setHoldi("Crystal");
-                    if(respTemp.holdic==1)
-                        resp.setHoldic("Single");
-                    else
-                        resp.setHoldic("Double");
-                }
-                resp.setHangta("Oval");
-                resp.setSzr("Standard");
-                Card.type="16";
-                resp.setClp("Silver clip");
+    card_del="Type: Lamination card"+"\n\n"+"printing side: "+prnt+"\n\n"+"Hanger: Dori"+"\n\n"+"Clip: Silver"+"\n\n"+"card holder Laminated: "+"\n\n"+"card :Board paper"+"\n\n"+"Processing: "+pro;
+    Card.type="22";
+    respTemp.put(card_del);
 
-                flag=true;
-            }
+}
 
-            //atn cars end
-
-
-            if(respTemp.prnt==1)
-                resp.setPrnt("Single");
-           else
-                resp.setPrnt("Double");
-
-             if(respTemp.pro==1)
-                    resp.setPro("Photo Scan");
-                else if(respTemp.pro==2)
-                 resp.setPro("Signature Scan");
-             else if(respTemp.pro==3)
-                 resp.setPro("Data Entry");
-
-               else
-           resp.setPro("Job/Crop");
-            if(flag)
-            selectedRespodentList.put(i, resp);
-            else{
-                Card.type="not possible";
-                selectedRespodentList.put(i, resp);
-
-            }
-        }}}
+        }}
